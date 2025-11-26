@@ -188,7 +188,7 @@ app.delete(
 
 // director route
 app.get("/directors", async (req, res, next) => {
-  const sql = `SELECT d.id, d.name, d.birth_year, m.id as movie_id, m.title as movie_title
+  const sql = `SELECT d.id, d.name, d."birthYear", m.id as movie_id, m.title as movie_title
   FROM directors d
   LEFT JOIN movies m ON d.id = m.director_id
   ORDER BY d.id ASC`;
@@ -201,7 +201,7 @@ app.get("/directors", async (req, res, next) => {
 });
 
 app.get("/directors/:id", async (req, res, next) => {
-  const sql = `SELECT d.id, d.name, d.birth_year, m.id as movie_id, m.title as movie_title
+  const sql = `SELECT d.id, d.name, d."birthYear", m.id as movie_id, m.title as movie_title
   FROM directors d
   LEFT JOIN movies m ON d.id = m.director_id
   WHERE d.id = $1`;
@@ -219,11 +219,10 @@ app.get("/directors/:id", async (req, res, next) => {
 app.post("/directors", authenticateToken, async (req, res, next) => {
   const { name, birth_year } = req.body;
   if (!name || !birth_year) {
-    return res.status(400).json({ error: "name, birth_year wajib diisi" });
+    return res.status(400).json({ error: "name, birthYear wajib diisi" });
   }
   try {
-    const sql =
-      "INSERT INTO directors (name, birth_year) VALUES ($1, $2) RETURNING *";
+    const sql = `INSERT INTO directors (name, "birthYear") VALUES ($1, $2) RETURNING *`;
     const result = await db.query(sql, [name, birth_year]);
     res.status(201).json(result.rows[0]);
   } catch (err) {
@@ -236,8 +235,7 @@ app.put(
   [authenticateToken, authorizeRole("admin")],
   async (req, res, next) => {
     const { name, birth_year } = req.body;
-    const sql =
-      "UPDATE directors SET name = $1, birth_year = $2 WHERE id = $3 RETURNING *";
+    const sql = `UPDATE directors SET name = $1, "birthYear" = $2 WHERE id = $3 RETURNING *`;
     try {
       const result = await db.query(sql, [name, birth_year, req.params.id]);
       if (result.rowCount === 0) {
@@ -273,8 +271,10 @@ app.use((req, res) => {
 });
 
 app.use((err, req, res, next) => {
-  console.error("[SERVER ERROR]", err.stack);
-  res.status(500).json({ error: "Terjadi kesalahan pada server" });
+  console.error(err); // tampilkan error asli
+  res.status(500).json({
+    error: err.message,
+  });
 });
 
 app.listen(PORT, "0.0.0.0", () => {
