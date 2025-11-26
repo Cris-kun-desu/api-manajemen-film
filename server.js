@@ -219,7 +219,7 @@ app.get("/directors/:id", async (req, res, next) => {
 app.post("/directors", authenticateToken, async (req, res, next) => {
   const { name, birth_year } = req.body;
   if (!name || !birth_year) {
-    return res.status(400).json({ error: "name, birthYear wajib diisi" });
+    return res.status(400).json({ error: "name, birth_year wajib diisi" });
   }
   try {
     const sql = `INSERT INTO directors (name, "birthYear") VALUES ($1, $2) RETURNING *`;
